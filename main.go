@@ -1,11 +1,12 @@
 package main
 
 import(
+	"crypto/tls"
 	"fmt"
 	"flag" //flag helps to parse command line args
 	"os"
 	"net/http"
-	"io/ioutil"
+	"net/url"
 
 	"github.com/jackdanger/collectlinks"
 )
@@ -20,25 +21,58 @@ func main(){
 		fmt.Println("Please specify the start page to crawl from")
 		os.Exit(1)
 	}
-	// Retreving the page html information 
-	retrieve(args[0])
+
+	//This gives us new channel that recieves and delivers strings
+	queue := make(chan string)
+
+	go func(){	//async function
+		queue <- args[0] 
+	}()
+
+	for url := range queue {
+		enqueue(url,queue)
+	}
 }
 
-func retrieve(url string){
+func enqueue(url string, queue chan string){
+	fmt.Println("fetching", url)
 
-	resp, err := http.Get(url)	
-	if err != nil {
-		return
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify:true,
 	}
-	//closes the tcp connection to some web servers (after the function ends)
-	//LIFO
+	transport := &http.Transport{
+		TLSClientConfig: tlsConfig,
+	}
+
+	client := http.Client{ Transport: transport}
+
+	resp, err := client.Get(url)
+	if err != nil{
+		return 
+	}
 	defer resp.Body.Close()
 
-	links := collectlinks.All(resp.Body) //using collect links package
-	for _,links := range(links){
-		fmt.Println(links)
+	links := collectlinks.All(resp.Body)
+	for _, link := range links {
+		absolute := fixUrl(link, url)
+
+		if url != "" {
+		go func() {queue <- absolute}()
+		}
+	}
+}
+
+func fixUrl(href, base string)(string){
+	url , err := url.Parse(href)
+	if err != nil {
+		return ""
 	}
 
-	body, _:= ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	baseUrl , err := url.Parse(base)
+	if err != nil {
+		return ""
+	}
+
+	url = baseUrl.ResolveReference(url)
+	return url.String()
 }
