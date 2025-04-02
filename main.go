@@ -11,6 +11,8 @@ import(
 	"github.com/jackdanger/collectlinks"
 )
 
+var visited = make(map[string]bool)
+
 func main(){
 	// Parsing the arguments(webUrl) from the command line
 	flag.Parse()
@@ -36,6 +38,7 @@ func main(){
 
 func enqueue(url string, queue chan string){
 	fmt.Println("fetching", url)
+	visited[url] = true
 
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify:true,
@@ -57,7 +60,9 @@ func enqueue(url string, queue chan string){
 		absolute := fixUrl(link, url)
 
 		if url != "" {
-		go func() {queue <- absolute}()
+			if !visited[absolute]{ //not to enqueue page twice
+				go func() {queue <- absolute}()
+			}
 		}
 	}
 }
