@@ -7,7 +7,6 @@ import(
 	"os"
 	"net/http"
 	"net/url"
-
 	"github.com/jackdanger/collectlinks"
 )
 
