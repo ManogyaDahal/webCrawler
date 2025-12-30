@@ -1,9 +1,10 @@
-/* 
-	This package defines all the necessary Flags that our webCrawler needs 
+/*
+This package defines all the necessary Flags that our webCrawler needs
 */
-package flags 
+package flags
 
 import (
+	"errors"
 	"flag"
 	"time"
 )
@@ -45,8 +46,59 @@ func ParseConfig(args []string) (*Config, error){
 	return cfg, nil
 }
 
+/* This function validates the user's input */
 func ValidateUserInput(cfg *Config) []error {
-	var errors []error
+	var errors []error = nil
 	
+	//validation start
+	if err := validateURL(cfg); err != nil{ 
+		errors = append(errors, err...)
+	}
+	if err := validateDepth(cfg); err != nil{ 
+		errors = append(errors, err)
+	}
+	if err := validateLimit(cfg); err != nil{ 
+		errors = append(errors, err)
+	}
+	if err := validateConcurrency(cfg); err != nil{ 
+		errors = append(errors, err)
+	}
+	if err := validateOutput(cfg); err != nil{ 
+		errors = append(errors, err)
+	}
+	if err := validateVerbose(cfg); err != nil{ 
+		errors = append(errors, err)
+	}
+	//validation ends
+
+	return errors
+}
+
+/* function for validating URL's */
+func validateURL(cfg *Config) error { 
+	if cfg.URL == ""  { return errors.New("URL is needed, Empty URL error") } 
+	if len(cfg.URL)<5 { return errors.New("URL with very small length") } 
+	if cfg.URL[:4] != "http" && (cfg.URL[4:5] != "s") { return errors.New("URL should have http or https") } 
+	/* Todo: validate for host lenght */
+	return nil
+}
+
+func validateDepth(cfg *Config) error { 
+	return nil
+}
+
+func validateLimit(cfg *Config) error { 
+	return nil
+}
+
+func validateConcurrency(cfg *Config) error { 
+	return nil
+}
+
+func validateOutput(cfg *Config) error { 
+	return nil
+}
+
+func validateVerbose(cfg *Config) error { 
 	return nil
 }
