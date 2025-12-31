@@ -106,7 +106,7 @@ func validateOutput(cfg *Config) error {
 	if len(cfg.Output) < 6 {
 		return errors.New("file should have .json extension with some name eg:x.json")
 	} 
-	if cfg.Output[len(cfg.Output)-6:] != ".json"{ 
+	if cfg.Output[len(cfg.Output)-5:] != ".json"{ 
 		return errors.New("The file provided should be of .json type")
 	}
 	return nil
