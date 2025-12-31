@@ -66,9 +66,6 @@ func ValidateUserInput(cfg *Config) []error {
 	if err := validateOutput(cfg); err != nil{ 
 		errors = append(errors, err)
 	}
-	if err := validateVerbose(cfg); err != nil{ 
-		errors = append(errors, err)
-	}
 	//validation ends
 
 	return errors
@@ -114,3 +111,5 @@ func validateOutput(cfg *Config) error {
 	}
 	return nil
 }
+
+
