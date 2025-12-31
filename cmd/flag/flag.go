@@ -16,8 +16,17 @@ type Config struct {
 	Delay 			time.Duration  // within how much duration launch a goroutine
 	Concurrency uint						//no. of webworker (goroutines) to launch
 	Output 			string					//what is your output file
+	Mode 				strict 					//three modes that define to use robot.txt or not
 	Verbose 		bool					
 }
+
+/* defines the strict type */
+type strict string
+const(
+	ConservativeMode strict= "conservative"
+	StrictMode strict= "strict"
+	IgnoreRobotMode strict = "ignoreRobot"
+)
 
 /* initialize the config of the webcrawler with default values*/
 func initConifg() (*Config){ 
@@ -32,11 +41,12 @@ func ParseConfig(args []string) (*Config, error){
 	cfg := initConifg()
 
 	fs.StringVar(&cfg.URL, "url", "", "Starting URL to crawl")
+	fs.StringVar(&cfg.URL, "mode", "strict", "Which mode you want your crawler to work in")
 	fs.UintVar(&cfg.Depth, "depth", 2, "Crawl depth")
 	fs.UintVar(&cfg.Limit, "limit", 100, "Max pages to crawl")
 	fs.DurationVar(&cfg.Delay, "delay", 500*time.Millisecond, "Delay between requests")
 	fs.UintVar(&cfg.Concurrency, "concurrency", 4, "Concurrent requests")
-	fs.StringVar(&cfg.Output, "out", "output.json", "Output file")
+	fs.StringVar(&cfg.Output, "output", "output.json", "Output file")
 	fs.BoolVar(&cfg.Verbose, "verbose", false, "Verbose logging")
 
 	if err := fs.Parse(args); err != nil { 
@@ -64,6 +74,9 @@ func ValidateUserInput(cfg *Config) []error {
 		errors = append(errors, err)
 	}
 	if err := validateOutput(cfg); err != nil{ 
+		errors = append(errors, err)
+	}
+	if err := validateMode(cfg); err != nil{ 
 		errors = append(errors, err)
 	}
 	//validation ends
@@ -112,4 +125,11 @@ func validateOutput(cfg *Config) error {
 	return nil
 }
 
-
+func validateMode(cfg *Config) error { 
+	switch cfg.Mode { 
+	case StrictMode, ConservativeMode, IgnoreRobotMode:
+	default:
+		return errors.New("Invalid mode selecion only strict, conservative and ignoreRobot accepted")
+	}
+	return nil
+}
