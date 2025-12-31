@@ -19,4 +19,10 @@ func main(){
 		log.Fatal("err:", "error occured while validating the user input check for --help flag")
 	}
 	/*flags*/
+
+	file, err:= CreateNewFile(cfg.Output)
+	if err != nil { 
+		log.Fatal("err:", "error while creating new file", err)
+	}
+	defer file.Close()
 }
