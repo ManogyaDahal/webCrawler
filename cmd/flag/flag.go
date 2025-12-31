@@ -10,13 +10,13 @@ import (
 )
 
 type Config struct {
-	URL 		 		string
-	Depth   		uint
-	Limit 			uint
-	Delay 			time.Duration
-	Concurrency uint
-	Output 			string
-	Verbose 		bool
+	URL 		 		string				 //path starting
+	Depth   		uint					 //no. of hops to reach the end website
+	Limit 			uint					 //Stop after visiting N number of websites in total
+	Delay 			time.Duration  // within how much duration launch a goroutine
+	Concurrency uint						//no. of webworker (goroutines) to launch
+	Output 			string					//what is your output file
+	Verbose 		bool					
 }
 
 /* initialize the config of the webcrawler with default values*/
@@ -52,7 +52,7 @@ func ValidateUserInput(cfg *Config) []error {
 	
 	//validation start
 	if err := validateURL(cfg); err != nil{ 
-		errors = append(errors, err...)
+		errors = append(errors, err)
 	}
 	if err := validateDepth(cfg); err != nil{ 
 		errors = append(errors, err)
@@ -83,22 +83,34 @@ func validateURL(cfg *Config) error {
 	return nil
 }
 
+/* depth means the number of hops requires to reach a specific url from starting page*/
 func validateDepth(cfg *Config) error { 
+	if cfg.Depth > 50 { 
+		return errors.New("Depth should be between 50 and 0")
+	}
 	return nil
 }
 
 func validateLimit(cfg *Config) error { 
+	if cfg.Limit == 0 { 
+		return errors.New("Limit should be >0")
+	}
 	return nil
 }
 
 func validateConcurrency(cfg *Config) error { 
+	if cfg.Concurrency == 0 || cfg.Concurrency > 100{ 
+		return errors.New("Concurrency should lie between 1-100")
+	}
 	return nil
 }
 
 func validateOutput(cfg *Config) error { 
-	return nil
-}
-
-func validateVerbose(cfg *Config) error { 
+	if len(cfg.Output) < 6 {
+		return errors.New("file should have .json extension with some name eg:x.json")
+	} 
+	if cfg.Output[len(cfg.Output)-6:] != ".json"{ 
+		return errors.New("The file provided should be of .json type")
+	}
 	return nil
 }
